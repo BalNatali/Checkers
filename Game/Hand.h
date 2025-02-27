@@ -6,43 +6,43 @@
 #include "Board.h"
 
 // methods for hands
-class Hand
+class Hand//функционал нажатий
 {
   public:
     Hand(Board *board) : board(board)
     {
     }
-    tuple<Response, POS_T, POS_T> get_cell() const
+    tuple<Response, POS_T, POS_T> get_cell() const//POS_T - тип для хранения поля и координат
     {
         SDL_Event windowEvent;
         Response resp = Response::OK;
         int x = -1, y = -1;
         int xc = -1, yc = -1;
-        while (true)
+        while (true)//бесконечный цикл, который ожидает клик 
         {
             if (SDL_PollEvent(&windowEvent))
             {
                 switch (windowEvent.type)
                 {
                 case SDL_QUIT:
-                    resp = Response::QUIT;
+                    resp = Response::QUIT;//выход
                     break;
-                case SDL_MOUSEBUTTONDOWN:
+                case SDL_MOUSEBUTTONDOWN://нажатие (логика при нажатии)
                     x = windowEvent.motion.x;
                     y = windowEvent.motion.y;
                     xc = int(y / (board->H / 10) - 1);
                     yc = int(x / (board->W / 10) - 1);
                     if (xc == -1 && yc == -1 && board->history_mtx.size() > 1)
                     {
-                        resp = Response::BACK;
+                        resp = Response::BACK;//выход
                     }
                     else if (xc == -1 && yc == 8)
                     {
-                        resp = Response::REPLAY;
+                        resp = Response::REPLAY;//запустить игру заново
                     }
                     else if (xc >= 0 && xc < 8 && yc >= 0 && yc < 8)
                     {
-                        resp = Response::CELL;
+                        resp = Response::CELL;//нажатие по какой-либо клетке 
                     }
                     else
                     {
@@ -50,21 +50,21 @@ class Hand
                         yc = -1;
                     }
                     break;
-                case SDL_WINDOWEVENT:
+                case SDL_WINDOWEVENT://изменение ширины экрана
                     if (windowEvent.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
                     {
                         board->reset_window_size();
                         break;
                     }
                 }
-                if (resp != Response::OK)
+                if (resp != Response::OK)//если нажатие было произведено, то выполняется return
                     break;
             }
         }
-        return {resp, xc, yc};
+        return {resp, xc, yc};//возвращает Response и координату если они есть (иначе -1)
     }
 
-    Response wait() const
+    Response wait() const//выполняется в конце игры, когда кто-то выиграл или проиграл. Программа ожидает от нас действие: закрыть или переиграть
     {
         SDL_Event windowEvent;
         Response resp = Response::OK;
@@ -75,7 +75,7 @@ class Hand
                 switch (windowEvent.type)
                 {
                 case SDL_QUIT:
-                    resp = Response::QUIT;
+                    resp = Response::QUIT;//закрыть 
                     break;
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
                     board->reset_window_size();
@@ -86,7 +86,7 @@ class Hand
                     int xc = int(y / (board->H / 10) - 1);
                     int yc = int(x / (board->W / 10) - 1);
                     if (xc == -1 && yc == 8)
-                        resp = Response::REPLAY;
+                        resp = Response::REPLAY;//переиграть
                 }
                 break;
                 }
